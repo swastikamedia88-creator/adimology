@@ -1,0 +1,14 @@
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[functions]
+  directory = "netlify/functions"
+
+[[scheduled_functions]]
+  name = "analyze-watchlist"
+  path = "/.netlify/functions/analyze-watchlist"
+  schedule = "0 11 * * *"

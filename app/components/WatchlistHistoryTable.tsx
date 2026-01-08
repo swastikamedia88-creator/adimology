@@ -1,0 +1,271 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+
+interface AnalysisRecord {
+  id: number;
+  from_date: string;
+  emiten: string;
+  bandar?: string;
+  barang_bandar?: number;
+  rata_rata_bandar?: number;
+  harga?: number;
+  ara?: number;       // maps to offer_teratas
+  arb?: number;       // maps to bid_terbawah
+  target_realistis?: number;
+  target_max?: number;
+  status: string;
+  error_message?: string;
+}
+
+export default function WatchlistHistoryTable() {
+  const [data, setData] = useState<AnalysisRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    emiten: '',
+    fromDate: '',
+    toDate: '',
+    status: 'all'
+  });
+  const [totalCount, setTotalCount] = useState(0);
+  const [page, setPage] = useState(0);
+  const pageSize = 50;
+
+  useEffect(() => {
+    fetchHistory();
+  }, [filters, page]);
+
+  // Debounced fetch for text inputs could be added, but manual trigger or loose effect is fine for now
+  
+  const fetchHistory = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        limit: pageSize.toString(),
+        offset: (page * pageSize).toString(),
+      });
+
+      if (filters.emiten) params.append('emiten', filters.emiten);
+      if (filters.fromDate) params.append('fromDate', filters.fromDate);
+      if (filters.toDate) params.append('toDate', filters.toDate);
+      if (filters.status !== 'all') params.append('status', filters.status);
+
+      const response = await fetch(`/api/watchlist-history?${params}`);
+      const json = await response.json();
+
+      if (json.success) {
+        setData(json.data || []);
+        setTotalCount(json.count || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching history:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatNumber = (num?: number) => num?.toLocaleString() ?? '-';
+  const formatDate = (dateStr: string) => {
+    if (!dateStr) return '-';
+    // Handle YYYY-MM-DD format
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  return (
+    <div className="glass-card-static">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h2>📊 Watchlist Analysis History</h2>
+        <button 
+          className="btn btn-primary" 
+          onClick={fetchHistory}
+          style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}
+        >
+          Refresh
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+        <div className="input-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
+          <label className="input-label compact-label">Emiten</label>
+          <input
+            type="text"
+            className="input-field compact-input"
+            placeholder="e.g., BBCA"
+            value={filters.emiten}
+            onChange={(e) => {
+              setFilters({ ...filters, emiten: e.target.value.toUpperCase() });
+              setPage(0); // Reset page on filter change
+            }}
+          />
+        </div>
+
+        <div className="input-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
+          <label className="input-label compact-label">From Date</label>
+          <input
+            type="date"
+            className="input-field compact-input"
+            value={filters.fromDate}
+            onChange={(e) => {
+              setFilters({ ...filters, fromDate: e.target.value });
+              setPage(0);
+            }}
+            onClick={(e) => e.currentTarget.showPicker()}
+          />
+        </div>
+
+        <div className="input-group" style={{ flex: '1 1 150px', marginBottom: 0 }}>
+          <label className="input-label compact-label">To Date</label>
+          <input
+            type="date"
+            className="input-field compact-input"
+            value={filters.toDate}
+            onChange={(e) => {
+              setFilters({ ...filters, toDate: e.target.value });
+              setPage(0);
+            }}
+            onClick={(e) => e.currentTarget.showPicker()}
+          />
+        </div>
+
+        <div className="input-group" style={{ flex: '1 1 120px', marginBottom: 0 }}>
+          <label className="input-label compact-label">Status</label>
+          <select
+            className="input-field compact-input"
+            value={filters.status}
+            onChange={(e) => {
+              setFilters({ ...filters, status: e.target.value });
+              setPage(0);
+            }}
+          >
+            <option value="all">All</option>
+            <option value="success">Success</option>
+            <option value="error">Error</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Table */}
+      {loading ? (
+        <div style={{ textAlign: 'center', padding: '3rem' }}>
+          <div className="spinner" style={{ margin: '0 auto' }}></div>
+        </div>
+      ) : data.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-secondary)', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
+          No data found matching your filters
+        </div>
+      ) : (
+        <>
+          <div style={{ overflowX: 'auto', border: '1px solid var(--border-color)', borderRadius: '12px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
+              <thead style={{ background: 'var(--bg-secondary)' }}>
+                <tr>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Date</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Emiten</th>
+                  <th style={{ padding: '1rem', textAlign: 'left', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Bandar</th>
+                  <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Harga</th>
+                  <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Target R1</th>
+                  <th style={{ padding: '1rem', textAlign: 'right', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Target Max</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((record, index) => (
+                  <tr
+                    key={record.id}
+                    style={{ 
+                      borderBottom: index < data.length - 1 ? '1px solid var(--border-color)' : 'none',
+                      background: index % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)'
+                    }}
+                  >
+                    <td style={{ padding: '0.75rem 1rem' }}>{formatDate(record.from_date)}</td>
+                    <td style={{ padding: '0.75rem 1rem', fontWeight: 600, color: 'var(--accent-primary)' }}>{record.emiten}</td>
+                    <td style={{ padding: '0.75rem 1rem' }}>{record.bandar || '-'}</td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: 600, fontVariantNumeric: 'tabular-nums', fontSize: '0.95rem' }}>
+                      {formatNumber(record.harga)}
+                    </td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: 600, fontVariantNumeric: 'tabular-nums', fontSize: '0.95rem', color: 'var(--accent-success)' }}>
+                      {formatNumber(record.target_realistis)}
+                    </td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'right', fontWeight: 600, fontVariantNumeric: 'tabular-nums', fontSize: '0.95rem', color: 'var(--accent-warning)' }}>
+                      {formatNumber(record.target_max)}
+                    </td>
+                    <td style={{ padding: '0.75rem 1rem', textAlign: 'center' }}>
+                      {record.status === 'success' ? (
+                        <span style={{ 
+                          display: 'inline-flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          width: '24px', 
+                          height: '24px', 
+                          borderRadius: '50%', 
+                          background: 'rgba(56, 239, 125, 0.1)', 
+                          color: 'var(--accent-success)' 
+                        }}>
+                          ✓
+                        </span>
+                      ) : (
+                        <span
+                          style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            width: '24px', 
+                            height: '24px', 
+                            borderRadius: '50%', 
+                            background: 'rgba(245, 87, 108, 0.1)', 
+                            color: 'var(--accent-warning)',
+                            cursor: 'pointer' 
+                          }}
+                          title={record.error_message}
+                        >
+                          ✕
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1.5rem' }}>
+            <div style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+              Showing {page * pageSize + 1} - {Math.min((page + 1) * pageSize, totalCount)} of {totalCount} records
+            </div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                className="btn"
+                style={{ 
+                  background: 'var(--bg-secondary)', 
+                  border: '1px solid var(--border-color)',
+                  color: page === 0 ? 'var(--text-muted)' : 'var(--text-primary)',
+                  padding: '0.5rem 1rem'
+                }}
+                disabled={page === 0}
+                onClick={() => setPage(page - 1)}
+              >
+                Previous
+              </button>
+              <button
+                className="btn"
+                style={{ 
+                  background: 'var(--bg-secondary)', 
+                  border: '1px solid var(--border-color)',
+                  color: (page + 1) * pageSize >= totalCount ? 'var(--text-muted)' : 'var(--text-primary)',
+                  padding: '0.5rem 1rem'
+                }}
+                disabled={(page + 1) * pageSize >= totalCount}
+                onClick={() => setPage(page + 1)}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
