@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { WatchlistItem, WatchlistGroup } from '@/lib/types';
+import { CheckCircle2, XCircle, MinusCircle } from 'lucide-react';
 
 interface WatchlistSidebarProps {
   onSelect?: (symbol: string) => void;
@@ -62,6 +63,22 @@ export default function WatchlistSidebar({ onSelect }: WatchlistSidebarProps) {
     fetchWatchlist();
   }, [selectedGroupId]);
 
+  // Handle real-time flag updates from InputForm
+  useEffect(() => {
+    const handleFlagUpdate = (event: any) => {
+      const { emiten, flag } = event.detail;
+      setWatchlist(prev => prev.map(item => {
+        if ((item.symbol || item.company_code).toUpperCase() === emiten.toUpperCase()) {
+          return { ...item, flag };
+        }
+        return item;
+      }));
+    };
+
+    window.addEventListener('emiten-flagged' as any, handleFlagUpdate);
+    return () => window.removeEventListener('emiten-flagged' as any, handleFlagUpdate);
+  }, []);
+
   const selectedGroup = groups.find(g => g.watchlist_id === selectedGroupId);
 
   if (loading && groups.length === 0) {
@@ -86,23 +103,23 @@ export default function WatchlistSidebar({ onSelect }: WatchlistSidebarProps) {
     <div style={{ padding: '1rem' }}>
       {/* Header with Group Selector */}
       <div style={{ marginBottom: '1rem' }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: '0.5rem'
         }}>
-          <h3 style={{ 
+          <h3 style={{
             margin: 0,
-            color: 'var(--text-secondary)', 
-            textTransform: 'uppercase', 
-            letterSpacing: '1px', 
-            fontSize: '0.75rem' 
+            color: 'var(--text-secondary)',
+            textTransform: 'uppercase',
+            letterSpacing: '1px',
+            fontSize: '0.75rem'
           }}>
             Watchlist
           </h3>
-          <span style={{ 
-            fontSize: '0.7rem', 
+          <span style={{
+            fontSize: '0.7rem',
             color: 'var(--text-muted)',
             background: 'rgba(255,255,255,0.1)',
             padding: '2px 6px',
@@ -111,7 +128,7 @@ export default function WatchlistSidebar({ onSelect }: WatchlistSidebarProps) {
             {watchlist.length}
           </span>
         </div>
-        
+
         {groups.length > 1 && (
           <select
             value={selectedGroupId || ''}
@@ -144,61 +161,69 @@ export default function WatchlistSidebar({ onSelect }: WatchlistSidebarProps) {
         </div>
       )}
 
-      {/* Watchlist Items */}
-      {!loading && (
-        <div 
-          className="watchlist-items-container"
-          style={{ 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '0.25rem',
-            maxHeight: 'calc(100vh - 160px)',
-            overflowY: 'auto'
-          }}
-        >
-          {watchlist.map((item, index) => {
-            const percentValue = parseFloat(item.percent) || 0;
-            const isPositive = percentValue >= 0;
-            
-            return (
-              <div 
-                key={item.company_id || index} 
-                className="watchlist-item"
-                onClick={() => onSelect?.(item.symbol || item.company_code)}
-                style={{ padding: '0.65rem 0.75rem' }}
-              >
-                <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div
+        className="watchlist-items-container"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '0.25rem',
+          maxHeight: 'calc(100vh - 160px)',
+          overflowY: 'auto'
+        }}
+      >
+        {watchlist.map((item, index) => {
+          const percentValue = parseFloat(item.percent) || 0;
+          const isPositive = percentValue >= 0;
+
+          return (
+            <div
+              key={item.company_id || index}
+              className="watchlist-item"
+              onClick={() => onSelect?.(item.symbol || item.company_code)}
+              style={{ padding: '0.65rem 0.75rem' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
                   <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.symbol || item.company_code}</div>
-                  <div style={{ 
-                    fontSize: '0.7rem', 
-                    color: '#999', 
-                    marginTop: '2px', 
-                    maxWidth: '140px', 
-                    overflow: 'hidden', 
-                    textOverflow: 'ellipsis', 
-                    whiteSpace: 'nowrap' 
-                  }}>
-                    {item.sector || item.company_name}
-                  </div>
+                  {item.flag === 'OK' && (
+                    <CheckCircle2 size={12} color="#3b82f6" fill="rgba(59, 130, 246, 0.2)" />
+                  )}
+                  {item.flag === 'NG' && (
+                    <XCircle size={12} color="#f97316" fill="rgba(249, 115, 22, 0.2)" />
+                  )}
+                  {item.flag === 'Neutral' && (
+                    <MinusCircle size={12} color="var(--text-secondary)" />
+                  )}
                 </div>
-                <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                  <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
-                    {item.formatted_price || item.last_price?.toLocaleString() || '-'}
-                  </div>
-                  <div style={{ 
-                    fontSize: '0.7rem', 
-                    color: isPositive ? 'var(--accent-success)' : 'var(--accent-warning)',
-                    marginTop: '1px',
-                    fontWeight: 500
-                  }}>
-                    {isPositive ? '+' : ''}{item.percent}%
-                  </div>
+                <div style={{
+                  fontSize: '0.7rem',
+                  color: '#999',
+                  marginTop: '2px',
+                  maxWidth: '140px',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap'
+                }}>
+                  {item.sector || item.company_name}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      )}
+              <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>
+                  {item.formatted_price || item.last_price?.toLocaleString() || '-'}
+                </div>
+                <div style={{
+                  fontSize: '0.7rem',
+                  color: isPositive ? 'var(--accent-success)' : 'var(--accent-warning)',
+                  marginTop: '1px',
+                  fontWeight: 500
+                }}>
+                  {isPositive ? '+' : ''}{item.percent}%
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }

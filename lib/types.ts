@@ -139,6 +139,7 @@ export interface WatchlistItem {
   formatted_price?: string;
   formatted_change_point?: string;
   formatted_change_percentage?: string;
+  flag?: 'OK' | 'NG' | 'Neutral' | null;
 }
 
 export interface WatchlistMetaResponse {
