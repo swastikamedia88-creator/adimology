@@ -73,10 +73,8 @@ Ikuti langkah-langkah berikut secara berurutan:
 ## A1. Setup Supabase
 
 1. Buat akun dan project baru di [Supabase](https://supabase.com/)
-2. Catat kredensial berikut dari **Project Settings > API**:
    - `Project URL` → untuk `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` key → untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `service_role` key → untuk `SUPABASE_SERVICE_ROLE_KEY`
+   - `anon public` key → untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY` atau `SUPABASE_KEY` (digunakan untuk migrasi)
 
 > **PENTING: Persiapan Database (Wajib Sekali Saja)**
 > Agar migrasi otomatis dapat berjalan, Anda perlu menyiapkan infrastruktur pelacakan migrasi secara manual:
@@ -97,7 +95,6 @@ Ikuti langkah-langkah berikut secara berurutan:
    |----------|-------|:-----:|
    | `NEXT_PUBLIC_SUPABASE_URL` | URL dari Supabase | ✅ |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key dari Supabase | ✅ |
-   | `SUPABASE_SERVICE_ROLE_KEY` | Service role key dari Supabase (untuk migrasi) | ✅ |
    | `CRON_SECRET` | String acak untuk keamanan cron | ✅ |
    | `GEMINI_API_KEY` | API Key dari [Google AI Studio](https://aistudio.google.com/) | ✅ |
 
@@ -153,8 +150,7 @@ Ikuti langkah-langkah berikut secara berurutan:
 1. Buat akun dan project baru di [Supabase](https://supabase.com/)
 2. Catat kredensial berikut dari **Project Settings > API**:
    - `Project URL` → untuk `NEXT_PUBLIC_SUPABASE_URL`
-   - `anon public` key → untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `service_role` key → untuk `SUPABASE_SERVICE_ROLE_KEY`
+   - `anon public` key → untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY` atau `SUPABASE_KEY` (digunakan untuk migrasi)
 
 > **PENTING: Persiapan Database (Wajib Sekali Saja)**
 > Lakukan langkah yang sama seperti di **Opsi A (A1: Langkah 1-4)** dengan menjalankan `supabase/000_init.sql` di SQL Editor Supabase.
@@ -186,7 +182,6 @@ Ikuti langkah-langkah berikut secara berurutan:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
    NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-   SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
    GEMINI_API_KEY=AIzaSy...
    ```
 
@@ -194,7 +189,6 @@ Ikuti langkah-langkah berikut secara berurutan:
    |----------|-------|:-----:|
    | `NEXT_PUBLIC_SUPABASE_URL` | URL dari Supabase | ✅ |
    | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key dari Supabase | ✅ |
-   | `SUPABASE_SERVICE_ROLE_KEY` | Service role key dari Supabase (untuk migrasi) | ✅ |
    | `GEMINI_API_KEY` | API Key dari [Google AI Studio](https://aistudio.google.com/) | ✅ |
    | `STOCKBIT_JWT_TOKEN` | Token manual (opsional, ekstensi lebih baik) | ❌ |
 
@@ -296,7 +290,6 @@ Fitur analisis AI (Story Analysis) menggunakan Netlify Functions. Untuk menjalan
 |----------|:-----:|:-----:|-----------|
 | `NEXT_PUBLIC_SUPABASE_URL` | ✅ | ✅ | URL project Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | ✅ | ✅ | Anon key Supabase |
-| `SUPABASE_SERVICE_ROLE_KEY` | ✅ | ✅ | Service role key untuk migrasi otomatis |
 | `CRON_SECRET` | ✅ | ❌ | Secret untuk scheduled functions |
 | `GEMINI_API_KEY` | ✅ | ✅ | API Key Google AI Studio |
 | `STOCKBIT_JWT_TOKEN` | ❌ | ⚠️ | Fallback token manual |

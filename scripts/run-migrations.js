@@ -17,14 +17,14 @@ const crypto = require('crypto');
 
 // Configuration
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const MIGRATIONS_DIR = path.join(__dirname, '..', 'supabase');
 
 // Validate environment variables
 if (!SUPABASE_URL || !SUPABASE_KEY) {
   console.error('❌ Error: Missing required environment variables');
   console.error('   Required: SUPABASE_URL (or NEXT_PUBLIC_SUPABASE_URL)');
-  console.error('   Required: SUPABASE_SERVICE_ROLE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)');
+  console.error('   Required: SUPABASE_KEY (or NEXT_PUBLIC_SUPABASE_ANON_KEY)');
   process.exit(1);
 }
 
