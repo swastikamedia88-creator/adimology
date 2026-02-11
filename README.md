@@ -73,8 +73,11 @@ Ikuti langkah-langkah berikut secara berurutan:
 ## A1. Setup Supabase
 
 1. Buat akun dan project baru di [Supabase](https://supabase.com/)
+2. Catat kredensial berikut dari **Project Settings > Data API**:
    - `Project URL` → untuk `NEXT_PUBLIC_SUPABASE_URL`
-   - `Anon public` key → untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Catat kredensial berikut dari **Project Settings > API Keys > Legacy anon, service_role API keys**:
+   - `anon public` key → untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
 
 > **PENTING: Persiapan Database (Wajib Sekali Saja)**
 > Agar migrasi otomatis dapat berjalan, Anda perlu menyiapkan infrastruktur pelacakan migrasi secara manual:
@@ -148,8 +151,9 @@ Ikuti langkah-langkah berikut secara berurutan:
 > ⚠️ Langkah ini **sama dengan Opsi A**. Jika sudah setup Supabase, lanjut ke B2.
 
 1. Buat akun dan project baru di [Supabase](https://supabase.com/)
-2. Catat kredensial berikut dari **Project Settings > API**:
+2. Catat kredensial berikut dari **Project Settings > Data API**:
    - `Project URL` → untuk `NEXT_PUBLIC_SUPABASE_URL`
+3. Catat kredensial berikut dari **Project Settings > API Keys > Legacy anon, service_role API keys**:
    - `anon public` key → untuk `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
 > **PENTING: Persiapan Database (Wajib Sekali Saja)**
